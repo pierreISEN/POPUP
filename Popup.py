@@ -1,52 +1,41 @@
-import time
-import pygetwindow as gw
-from pywinauto import Application
+import time  # Importer le module time pour la gestion du temps
+import pygetwindow as gw  # Importer pygetwindow pour la gestion des fenêtres
+from pywinauto import Application  # Importer Application depuis pywinauto pour interagir avec les fenêtres
 
+# Dimensions de l'écran
 screen_width = 1920
 screen_height = 1080
 
 def close_popups():
-    while True:
-        all_windows = gw.getAllWindows()
+    # Fonction pour fermer les popups
+    while True:  # Boucle infinie pour surveiller en permanence les fenêtres
 
-        for window in all_windows:
-            if window.visible:
-                left, top, right, bottom = window.left, window.top, window.right, window.bottom
-
-                if left > screen_width - 400 and top > screen_height - 400:
-                    try:
-                        app = Application().connect(handle=window._hWnd)
-                        app.kill()
-                        print(f"Fermé la fenêtre pop-up : {window.title}")
-                    except Exception as e:
-                        print(f"Erreur en fermant la fenêtre {window.title}: {e}")
-
-        time.sleep(5)
-
-def block_new_popups():
-    while True:
         # Obtenir toutes les fenêtres actives sur l'écran
         all_windows = gw.getAllWindows()
 
-        # Filtrer les nouvelles fenêtres qui sont en bas à droite de l'écran
-        new_bottom_right_popups = [window for window in all_windows if window.visible and window.left > screen_width - 400 and window.top > screen_height - 400]
+        # Parcourir toutes les fenêtres
+        for window in all_windows:
+            if window.visible:  # Vérifier si la fenêtre est visible à l'écran
 
-        # Fermer les nouvelles fenêtres qui sont des popups en bas à droite de l'écran
-        for window in new_bottom_right_popups:
-            try:
-                app = Application().connect(handle=window._hWnd)
-                app.kill()
-                print(f"Fermé la fenêtre pop-up : {window.title}")
-            except Exception as e:
-                print(f"Erreur en fermant la fenêtre {window.title}: {e}")
+                # Obtenir les coordonnées de la fenêtre
+                left, top, right, bottom = window.left, window.top, window.right, window.bottom
 
-        time.sleep(2)
+                # Vérifier si la fenêtre est en bas à droite de l'écran
+                if left > screen_width - 400 and top > screen_height - 400:
+                    try:
+                        # Se connecter à l'application associée à la fenêtre
+                        app = Application().connect(handle=window._hWnd)
+                        # Fermer la fenêtre
+                        app.kill()
+                        # Afficher un message de confirmation
+                        print(f"Fermé la fenêtre pop-up : {window.title}")
+                    except Exception as e:
+                        # Afficher une erreur s'il y a un problème lors de la fermeture de la fenêtre
+                        print(f"Erreur en fermant la fenêtre {window.title}: {e}")
 
+        # Attendre pendant 5 secondes avant de vérifier à nouveau les fenêtres
+        time.sleep(5)
+
+# Exécuter la fonction close_popups() si le script est exécuté directement
 if __name__ == "__main__":
-    import threading
-    thread1 = threading.Thread(target=close_popups)
-    thread2 = threading.Thread(target=block_new_popups)
-    thread1.start()
-    thread2.start()
-    thread1.join()
-    thread2.join()
+    close_popups()
